@@ -1,26 +1,39 @@
 #pragma once
 
+#include <QMainWindow>
 #include <QObject>
 #include <QWidget>
+#include <memory>
+#include <unordered_map>
 
-#include "ui_untitled.h"
+#include "facade.hpp"
+
+#include "ui_kafka_consumer_properties.h"
+#include "ui_main_window.h"
 
 namespace highway::ui {
+
+typedef std::shared_ptr<highway::bridge::Facade> Facade;
 
 class UI : public QObject {
   Q_OBJECT
 public:
-  explicit UI(QObject *parent = nullptr);
+  explicit UI(Facade facade,
+              QObject *parent = nullptr);
   UI(UI &) = delete;
   virtual ~UI() = default;
-  Ui::Form _form;
+  Ui::MainWindow _mainWindowUI;
+  Ui::AddKafkaConsumerForm _addConsumerForm;
 
 public slots:
-  void toggle(bool);
-  void addConsumer(std::string);
+  void showAddConsumerWindow();
+  void parseConsumerParameters(bool);
 
 private:
-  QWidget _widget;
+  QMainWindow _mainWindow;
+  bool _isConsumerWindowAvailable;
+  QWidget _addConsumerWindow;
+  Facade _facade;
 };
 
 } // namespace highway::ui

@@ -46,25 +46,4 @@ private:
   std::vector<std::string> _topics;
   std::unique_ptr<RdKafka::KafkaConsumer> _consumer;
 };
-
-class TL : public QObject {
-  Q_OBJECT
-public:
-  explicit TL(QObject *parent = nullptr) : QObject(parent){};
-signals:
-  auto t1(std::shared_ptr<KafkaConsumer>) -> void;
-
-public slots:
-  auto t2() -> void {
-    auto c = std::make_shared<KafkaConfiguration>(ConfType::CONF_GLOBAL);
-    c->set("bootstrap.servers", "hetzner-lab-1.tic-server.com:9092");
-    c->set("group.id", "test");
-
-    std::shared_ptr<KafkaConsumer> r = std::make_shared<KafkaConsumer>(c);
-    r->subscribe(std::vector<std::string>{"test_topic"});
-
-    emit this->t1(r);
-  };
-};
-
 }; // namespace highway::kafka

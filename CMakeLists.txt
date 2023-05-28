@@ -15,8 +15,10 @@ find_package(lz4 CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 
 add_executable(${PROJECT_NAME}
-    src/untitled.ui
+    src/kafka_consumer_properties.ui
+    src/main_window.ui
     src/main.cpp
+    src/facade.hpp src/facade.cpp 
     src/kafka.hpp src/kafka.cpp 
     src/state.hpp src/state.cpp
     src/ui.hpp src/ui.cpp
