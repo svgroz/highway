@@ -1,4 +1,9 @@
 {
     "clang-format.executable": "/opt/homebrew/opt/llvm/bin/clang-format",
-    "clangd.path": "/opt/homebrew/opt/llvm/bin/clangd"
+    "clangd.path": "/opt/homebrew/opt/llvm/bin/clangd",
+    "clangd.arguments": [
+        "--background-index",
+        "--clang-tidy",
+        "--compile-commands-dir=out/build/clang-debug"
+    ]
 }
