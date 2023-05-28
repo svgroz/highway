@@ -3,6 +3,8 @@
 #include <QObject>
 #include <librdkafka/rdkafkacpp.h>
 
+#include <string>
+
 namespace highway::kafka {
 
 enum ConfType {
@@ -65,4 +67,4 @@ public slots:
   };
 };
 
-}; // namespace higway::kafka
+}; // namespace highway::kafka
