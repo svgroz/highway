@@ -1,29 +1,20 @@
-#include <memory>
 #define SPDLOG_ACTIVE_LEVEL                                                    \
   SPDLOG_LEVEL_TRACE // Must: define SPDLOG_ACTIVE_LEVEL before
 
 #include <spdlog/sinks/stdout_sinks.h>
 #include <spdlog/spdlog.h>
 
+#include "context.hpp"
 #include <QApplication>
+#include <memory>
 
-#include "facade.hpp"
-#include "kafka.hpp"
-#include "state.hpp"
-#include "ui.hpp"
-#include "ui_main.h"
+using namespace highway;
 
-int main(int argc, char *argv[]) {
-  using namespace highway;
-
+int main(int argc, char **argv) {
   spdlog::set_pattern("[source %s] [function %!] [line %#] %v");
   SPDLOG_INFO("Starting app");
 
-  auto app = new QApplication(argc, argv);
-
-  auto state = std::make_shared<state::State>();
-  auto facade = std::make_shared<bridge::Facade>(state);
-  ui::UI ui(facade);
-
-  return app->exec();
+  QApplication app(argc, argv);
+  auto ctx = std::make_shared<context::Context>();
+  return app.exec();
 }

@@ -6,46 +6,47 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>789</width>
-    <height>577</height>
+    <width>800</width>
+    <height>600</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <property name="maximumSize">
-    <size>
-     <width>16777215</width>
-     <height>16777215</height>
-    </size>
-   </property>
-   <layout class="QVBoxLayout" name="verticalLayout_2">
+   <layout class="QVBoxLayout" name="verticalLayout">
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
-       <widget class="QTreeWidget" name="treeWidget">
-        <column>
-         <property name="text">
-          <string>Sources</string>
-         </property>
-        </column>
-        <item>
-         <property name="text">
-          <string>Kafka</string>
-         </property>
-         <item>
-          <property name="text">
-           <string>New Subitem</string>
-          </property>
-         </item>
-        </item>
+       <widget class="QPushButton" name="newConnectionButton">
+        <property name="text">
+         <string>New connection</string>
+        </property>
        </widget>
       </item>
       <item>
-       <widget class="QTableView" name="connectionData"/>
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
       </item>
      </layout>
+    </item>
+    <item>
+     <widget class="QTreeWidget" name="connectionsTreeWidget">
+      <column>
+       <property name="text">
+        <string>Connections</string>
+       </property>
+      </column>
+     </widget>
     </item>
    </layout>
   </widget>
@@ -54,34 +55,12 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>789</width>
+     <width>800</width>
      <height>24</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuHigway">
-    <property name="title">
-     <string>Higway</string>
-    </property>
-    <addaction name="actionAdd_connection"/>
-   </widget>
-   <addaction name="menuHigway"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <action name="actionjyg">
-   <property name="text">
-    <string>jyg</string>
-   </property>
-  </action>
-  <action name="actionjiuyiuyiuy">
-   <property name="text">
-    <string>jiuyiuyiuy</string>
-   </property>
-  </action>
-  <action name="actionAdd_connection">
-   <property name="text">
-    <string>Add connection</string>
-   </property>
-  </action>
  </widget>
  <resources/>
  <connections/>

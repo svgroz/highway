@@ -5,7 +5,7 @@
             "name": "clang-system-debug",
             "displayName": "clang-system-debug",
             "description": "clang-system-debug",
-            "generator": "Unix Makefiles",
+            "generator": "Ninja",
             "binaryDir": "${sourceDir}/out/build/${presetName}",
             "cacheVariables": {
                 "CMAKE_C_COMPILER": "/usr/bin/clang",

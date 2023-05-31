@@ -1,39 +1,32 @@
 #pragma once
 
-#include <QMainWindow>
-#include <QObject>
-#include <QWidget>
-#include <memory>
-#include <unordered_map>
-
-#include "facade.hpp"
-
-#include "ui_kafka_consumer_properties.h"
+#include "ui_connection_properties.h"
 #include "ui_main_window.h"
+
+#include <QMainWindow>
+#include <QWidget>
+
+#include <functional>
 
 namespace highway::ui {
 
-typedef std::shared_ptr<highway::bridge::Facade> Facade;
+
 
 class UI : public QObject {
   Q_OBJECT
 public:
-  explicit UI(Facade facade,
-              QObject *parent = nullptr);
+  explicit UI(QObject *parent = nullptr);
   UI(UI &) = delete;
   virtual ~UI() = default;
-  Ui::MainWindow _mainWindowUI;
-  Ui::AddKafkaConsumerForm _addConsumerForm;
 
 public slots:
-  void showAddConsumerWindow();
-  void parseConsumerParameters(bool);
+  void showConnectionPropertiesForm();
+  void connectionPropertiesFormDestroyed(QObject *);
 
 private:
-  QMainWindow _mainWindow;
-  bool _isConsumerWindowAvailable;
-  QWidget _addConsumerWindow;
-  Facade _facade;
+  QMainWindow *_mainWindowWidget;
+  QWidget *_connectionProperiesWidget;
+  Ui::MainWindow *_mainWindow;
+  Ui::ConnectionPropertiesForm *_connectionPropertiesForm;
 };
-
 } // namespace highway::ui

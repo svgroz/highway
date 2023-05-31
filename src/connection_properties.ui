@@ -1,30 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>AddKafkaConsumerForm</class>
- <widget class="QWidget" name="AddKafkaConsumerForm">
+ <class>ConnectionPropertiesForm</class>
+ <widget class="QWidget" name="ConnectionPropertiesForm">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>672</width>
-    <height>406</height>
+    <width>594</width>
+    <height>431</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Kafka Consumer Configuration</string>
+   <string>Connection properties</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_2">
+  <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QTableWidget" name="kafkaConsumerPropertiesTable">
-     <property name="columnCount">
-      <number>2</number>
-     </property>
-     <attribute name="horizontalHeaderHighlightSections">
-      <bool>false</bool>
-     </attribute>
-     <attribute name="horizontalHeaderMinimumSectionSize">
-      <number>0</number>
-     </attribute>
+    <widget class="QTableWidget" name="connectionPropertiesTableWidget">
      <attribute name="horizontalHeaderStretchLastSection">
       <bool>true</bool>
      </attribute>
@@ -33,12 +24,12 @@
      </attribute>
      <row>
       <property name="text">
-       <string>Bootstrap servers</string>
+       <string>Host:port</string>
       </property>
      </row>
      <row>
       <property name="text">
-       <string>Group id</string>
+       <string>Group</string>
       </property>
      </row>
      <row>
@@ -60,48 +51,30 @@
       <property name="text">
        <string>bootstrap.servers</string>
       </property>
-      <property name="flags">
-       <set>ItemIsSelectable|ItemIsUserCheckable|ItemIsEnabled</set>
-      </property>
      </item>
      <item row="0" column="1">
       <property name="text">
        <string>localhost:9092</string>
-      </property>
-      <property name="flags">
-       <set>ItemIsSelectable|ItemIsEditable|ItemIsUserCheckable|ItemIsEnabled</set>
       </property>
      </item>
      <item row="1" column="0">
       <property name="text">
        <string>group.id</string>
       </property>
-      <property name="flags">
-       <set>ItemIsSelectable|ItemIsUserCheckable|ItemIsEnabled</set>
-      </property>
      </item>
      <item row="1" column="1">
       <property name="text">
        <string>group_1</string>
-      </property>
-      <property name="flags">
-       <set>ItemIsSelectable|ItemIsEditable|ItemIsUserCheckable|ItemIsEnabled</set>
       </property>
      </item>
      <item row="2" column="0">
       <property name="text">
        <string>topics</string>
       </property>
-      <property name="flags">
-       <set>ItemIsSelectable|ItemIsUserCheckable|ItemIsEnabled</set>
-      </property>
      </item>
      <item row="2" column="1">
       <property name="text">
-       <string>test_1,test_2</string>
-      </property>
-      <property name="flags">
-       <set>ItemIsSelectable|ItemIsEditable|ItemIsUserCheckable|ItemIsEnabled</set>
+       <string>topic_1,topic_2</string>
       </property>
      </item>
     </widget>
@@ -109,23 +82,9 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QPushButton" name="addPropertyRowButton">
-       <property name="text">
-        <string>Add propery</string>
-       </property>
-      </widget>
-     </item>
-     <item>
       <widget class="QPushButton" name="saveButton">
        <property name="text">
         <string>Save</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="discardButton">
-       <property name="text">
-        <string>Discard</string>
        </property>
       </widget>
      </item>
