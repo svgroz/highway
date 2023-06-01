@@ -10,11 +10,12 @@ class Context final : public QObject {
   Q_OBJECT
 public:
   explicit Context(QObject *parent = nullptr);
-  Context(Context&) = delete;
-  virtual ~Context() = default;
+  Context(Context &) = delete;
+  Context(Context &&) = delete;
+  ~Context() final = default;
 
 private:
-    highway::ui::UI *_ui;
-    highway::state::State *_state;
+  highway::ui::UI *_ui;
+  highway::state::State *_state;
 };
 } // namespace highway::context

@@ -10,18 +10,17 @@
 
 namespace highway::ui {
 
-
-
-class UI : public QObject {
+class UI final : public QObject {
   Q_OBJECT
 public:
   explicit UI(QObject *parent = nullptr);
   UI(UI &) = delete;
-  virtual ~UI() = default;
+  ~UI() final = default;
 
 public slots:
   void showConnectionPropertiesForm();
   void connectionPropertiesFormDestroyed(QObject *);
+  void saveConnectionProperties(bool);
 
 private:
   QMainWindow *_mainWindowWidget;
