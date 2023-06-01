@@ -1,11 +1,9 @@
-project(highway)
-cmake_minimum_required(VERSION 3.25)
+cmake_minimum_required(VERSION 3.16)
 
-set (CMAKE_CXX_STANDARD 20)
+project(helloworld VERSION 1.0.0 LANGUAGES CXX)
 
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
-set(CMAKE_AUTOUIC ON)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Qt6Core CONFIG REQUIRED)
 find_package(Qt6Gui CONFIG REQUIRED)
@@ -14,16 +12,6 @@ find_package(RdKafka CONFIG REQUIRED)
 find_package(lz4 CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 
-add_executable(${PROJECT_NAME}
-    src/main_window.ui
-    src/connection_properties.ui
-    src/context.hpp 
-    src/context.cpp 
-    src/main.cpp
-    src/state.hpp
-    src/state.cpp
-    src/ui.hpp
-    src/ui.cpp
-    )
+qt_standard_project_setup()
 
-target_link_libraries(${PROJECT_NAME} PUBLIC PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets RdKafka::rdkafka RdKafka::rdkafka++ lz4::lz4 spdlog::spdlog)
+add_subdirectory(src/app)
