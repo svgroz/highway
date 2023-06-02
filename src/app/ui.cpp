@@ -8,62 +8,22 @@
 
 #include <functional>
 
+#include <qdialog.h>
 #include <qobject.h>
 #include <qpushbutton.h>
+#include <qregularexpression.h>
+#include <qvalidator.h>
 #include <spdlog/spdlog.h>
 #include <unordered_map>
 
 using namespace highway::ui;
 
-UI::UI(QObject *parent)
-    : QObject(parent), _mainWindowWidget(new QMainWindow()),
-      _connectionProperiesWidget(nullptr), _mainWindow(new Ui::MainWindow()),
-      _connectionPropertiesForm(nullptr) {
-  _mainWindow->setupUi(_mainWindowWidget);
-  _mainWindowWidget->show();
+void saveConnectionProperties(
+    Ui::ConnectionPropertiesDialog *_connectionProperties) {
+  auto connectionId = _connectionProperties->connectionId->text().toStdString();
+  auto topics = _connectionProperties->topicsToListen->text().toStdString();
 
-  QObject::connect(_mainWindow->newConnectionButton, &QPushButton::clicked,
-                   this, &UI::showConnectionPropertiesForm);
-}
-
-void UI::showConnectionPropertiesForm() {
-  if (_connectionProperiesWidget == nullptr) {
-    _connectionProperiesWidget = new QWidget();
-    _connectionProperiesWidget->setAttribute(Qt::WA_DeleteOnClose, true);
-
-    _connectionPropertiesForm = new Ui::ConnectionPropertiesForm();
-
-    QObject::connect(_connectionProperiesWidget, &QWidget::destroyed, this,
-                     &UI::connectionPropertiesFormDestroyed);
-    _connectionPropertiesForm->setupUi(_connectionProperiesWidget);
-    QObject::connect(_connectionPropertiesForm->saveButton, &QPushButton::clicked, this, &UI::saveConnectionProperties);
-
-    _connectionProperiesWidget->show();
-    return;
-  }
-
-  if (_connectionProperiesWidget->isHidden() ||
-      _connectionProperiesWidget->isActiveWindow() == false) {
-    _connectionProperiesWidget->show();
-    _connectionProperiesWidget->activateWindow();
-    return;
-  }
-}
-
-void UI::connectionPropertiesFormDestroyed(QObject *) {
-  if (_connectionPropertiesForm != nullptr) {
-    delete _connectionPropertiesForm;
-    _connectionPropertiesForm = nullptr;
-  }
-
-  _connectionProperiesWidget = nullptr;
-}
-
-void UI::saveConnectionProperties(bool) {
-  auto connectionId = _connectionPropertiesForm->connectionId->text().toStdString();
-  auto topics = _connectionPropertiesForm->topics->text().toStdString();
-
-  auto table = _connectionPropertiesForm->connectionPropertiesTableWidget;
+  auto table = _connectionProperties->propertiesTableWidget;
 
   auto r = std::unordered_map<std::string, std::string>();
 
@@ -76,4 +36,39 @@ void UI::saveConnectionProperties(bool) {
     SPDLOG_INFO("Connection propery: {}={}", key, value);
     r.insert({key, value});
   }
+}
+
+UI::UI(QObject *parent)
+    : QObject(parent), _mainWindowWidget(new QMainWindow()),
+      _mainWindow(new Ui::MainWindow()) {
+
+  _mainWindow->setupUi(_mainWindowWidget);
+  _mainWindowWidget->show();
+
+  QObject::connect(_mainWindow->newConnectionButton, &QPushButton::clicked,
+                   this, &UI::showConnectionPropertiesForm);
+}
+
+void UI::showConnectionPropertiesForm() {
+  auto _connectionProperiesWidget = new QDialog(this->_mainWindowWidget);
+  _connectionProperiesWidget->setAttribute(Qt::WA_DeleteOnClose, true);
+
+  auto _connectionPropertiesDialog = new Ui::ConnectionPropertiesDialog();
+  _connectionPropertiesDialog->setupUi(_connectionProperiesWidget);
+
+  auto topicsRegex = QRegularExpression("[a-zA-z0-9,_]+");
+  auto topicsValidator =
+      new QRegularExpressionValidator(topicsRegex, _connectionProperiesWidget);
+
+  _connectionPropertiesDialog->connectionId->setValidator(topicsValidator);
+
+  QObject::connect(_connectionPropertiesDialog->buttonBox,
+                   &QDialogButtonBox::accepted, this,
+                   [_connectionPropertiesDialog]() {
+                     saveConnectionProperties(_connectionPropertiesDialog);
+                   });
+
+  _connectionProperiesWidget->show();
+
+  return;
 }
