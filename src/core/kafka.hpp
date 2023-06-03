@@ -21,6 +21,8 @@ using ConsumerProperties = struct {
   QHash<QString, QString> properties;
 };
 
+using ConsumerStatus = enum { CONNECTED, DISCONNECTED, NOT_INITIALIZED };
+
 using ConsumerId = QString;
 
 class Consumer final : public QObject {
@@ -29,8 +31,10 @@ public:
   explicit Consumer(ConsumerProperties properties, QObject *parent = nullptr);
   Consumer(Consumer &) = delete;
   ~Consumer() override;
-  bool connect();
-  bool isConnected();
+  void consumerProperties(ConsumerProperties consumerProperties);
+  ConsumerStatus connect();
+  ConsumerStatus disocnnect();
+  ConsumerStatus status() noexcept;
   const ConsumerId id();
 
 private:

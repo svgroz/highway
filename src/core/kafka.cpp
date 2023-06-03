@@ -15,7 +15,33 @@ using namespace highway::kafka;
 
 Consumer::Consumer(ConsumerProperties consumerProperties, QObject *parent)
     : QObject(parent), _consumerProperties(consumerProperties),
-      _conf(RdKafka::Conf::create(RdKafka::Conf::CONF_GLOBAL)) {
+      _conf(RdKafka::Conf::create(RdKafka::Conf::CONF_GLOBAL)),
+      _consumer(nullptr) {}
+
+Consumer::~Consumer() {
+  if (this->_consumer != nullptr) {
+    auto consumerId = this->id().toStdString();
+    SPDLOG_INFO("Consumer closing is strarted: consumer id={}", consumerId);
+    this->_consumer->close();
+    delete this->_consumer;
+    this->_consumer = nullptr;
+    SPDLOG_INFO("Consumer closed: conusmer id={}", consumerId);
+  }
+
+  if (this->_conf != nullptr) {
+    delete this->_conf;
+    this->_conf = nullptr;
+  }
+}
+
+void Consumer::consumerProperties(ConsumerProperties consumerProperties) {
+  this->_consumerProperties = consumerProperties;
+}
+
+ConsumerStatus Consumer::connect() {
+  if (this->_consumer != nullptr) {
+    return ConsumerStatus::CONNECTED;
+  }
 
   std::string e;
 
@@ -35,37 +61,8 @@ Consumer::Consumer(ConsumerProperties consumerProperties, QObject *parent)
   _consumer = RdKafka::KafkaConsumer::create(_conf, e);
   if (_consumer == nullptr) {
     SPDLOG_WARN("Could not connect consumer: consumer id={} error message={}",
-                consumerProperties.id.toStdString(), e);
-  }
-}
-
-Consumer::~Consumer() {
-  if (this->_consumer != nullptr) {
-    auto consumerId = this->id().toStdString();
-    SPDLOG_INFO("Consumer closing is strarted: consumer id={}", consumerId);
-    this->_consumer->close();
-    delete this->_consumer;
-    this->_consumer = nullptr;
-    SPDLOG_INFO("Consumer closed: conusmer id={}", consumerId);
-  }
-
-  if (this->_conf != nullptr) {
-    delete this->_conf;
-    this->_conf = nullptr;
-  }
-}
-
-bool Consumer::connect() {
-  if (this->_consumer != nullptr) {
-    return true;
-  }
-
-  std::string e;
-  _consumer = RdKafka::KafkaConsumer::create(_conf, e);
-  if (_consumer == nullptr) {
-    SPDLOG_WARN("Could not connect consumer: consumer id={} error message={}",
                 _consumerProperties.id.toStdString(), e);
-    return false;
+    return ConsumerStatus::NOT_INITIALIZED;
   }
 
   auto topics = std::vector<std::string>();
@@ -74,11 +71,27 @@ bool Consumer::connect() {
     topics.push_back(v);
   }
 
-  _consumer->subscribe(topics);
-
-  return true;
+  if (RdKafka::ErrorCode::ERR_NO_ERROR == _consumer->subscribe(topics)) {
+    return ConsumerStatus::CONNECTED;
+  } else {
+    return ConsumerStatus::DISCONNECTED;
+  }
 }
 
-bool Consumer::isConnected() { return this->_consumer == nullptr; }
+ConsumerStatus Consumer::disocnnect() {
+  if (this->_consumer == nullptr) {
+    return ConsumerStatus::NOT_INITIALIZED;
+  }
+
+  this->_consumer->close();
+  delete this->_consumer;
+  this->_consumer = nullptr;
+  return ConsumerStatus::DISCONNECTED;
+}
+
+ConsumerStatus Consumer::status() noexcept {
+  return this->_consumer == nullptr ? ConsumerStatus::DISCONNECTED
+                                    : ConsumerStatus::CONNECTED;
+}
 
 const ConsumerId Consumer::id() { return _consumerProperties.id; }

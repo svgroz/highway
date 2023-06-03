@@ -12,7 +12,7 @@ using ConsumerProperties = highway::kafka::ConsumerProperties;
 
 using ConnectionStatus = struct {
   highway::kafka::ConsumerId consumerId;
-  bool isConnected;
+  highway::kafka::ConsumerStatus consumerStatus;
 };
 
 class Facade final : public QObject {

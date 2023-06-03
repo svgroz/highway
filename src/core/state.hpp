@@ -18,9 +18,6 @@ public:
   explicit State(QObject *parent = nullptr);
   State(State &) = delete;
   State(State &&) = delete;
-  ~State() final {
-    SPDLOG_INFO("Closing state");
-  };
   const highway::kafka::ConsumerId addConsumer(Consumer *c);
 
 private:
