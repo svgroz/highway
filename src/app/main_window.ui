@@ -40,13 +40,7 @@
      </layout>
     </item>
     <item>
-     <widget class="QTreeWidget" name="connectionsTreeWidget">
-      <column>
-       <property name="text">
-        <string>Connections</string>
-       </property>
-      </column>
-     </widget>
+     <widget class="QListWidget" name="connectionListWidget"/>
     </item>
    </layout>
   </widget>

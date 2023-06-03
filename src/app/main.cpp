@@ -4,9 +4,13 @@
 #include <spdlog/sinks/stdout_sinks.h>
 #include <spdlog/spdlog.h>
 
-#include "context.hpp"
-#include <QApplication>
 #include <memory>
+
+#include <QApplication>
+
+#include "ui.hpp"
+
+#include <facade.hpp>
 
 using namespace highway;
 
@@ -15,6 +19,9 @@ int main(int argc, char **argv) {
   SPDLOG_INFO("Starting app");
 
   QApplication app(argc, argv);
-  auto ctx = std::make_shared<context::Context>();
+
+  auto facade = new highway::facade::Facade(&app);
+  auto ui = new ui::UI(facade, &app);
+  
   return app.exec();
 }

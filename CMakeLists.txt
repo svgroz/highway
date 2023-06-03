@@ -15,3 +15,4 @@ find_package(spdlog CONFIG REQUIRED)
 qt_standard_project_setup()
 
 add_subdirectory(src/app)
+add_subdirectory(src/core)

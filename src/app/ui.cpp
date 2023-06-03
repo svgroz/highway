@@ -1,74 +1,82 @@
 #include "ui.hpp"
+
+#include "facade.hpp"
 #include "ui_connection_properties.h"
 #include "ui_main_window.h"
 
+#include <QDialog>
+#include <QHash>
 #include <QObject>
 #include <QPushButton>
+#include <QRegularExpression>
+#include <QString>
+#include <QValidator>
 #include <QWidget>
 
 #include <functional>
+#include <memory>
 
-#include <qdialog.h>
-#include <qobject.h>
-#include <qpushbutton.h>
-#include <qregularexpression.h>
-#include <qvalidator.h>
 #include <spdlog/spdlog.h>
-#include <unordered_map>
 
 using namespace highway::ui;
 
-void saveConnectionProperties(
-    Ui::ConnectionPropertiesDialog *_connectionProperties) {
-  auto connectionId = _connectionProperties->connectionId->text().toStdString();
-  auto topics = _connectionProperties->topicsToListen->text().toStdString();
+void UI::saveConnectionProperties(
+    Ui::ConnectionPropertiesDialog _connectionProperties) {
+  auto connectionId = _connectionProperties.connectionId->text();
+  auto topics = _connectionProperties.topicsToListen->text();
 
-  auto table = _connectionProperties->propertiesTableWidget;
+  auto table = _connectionProperties.propertiesTableWidget;
 
-  auto r = std::unordered_map<std::string, std::string>();
+  QHash<QString, QString> properties = QHash<QString, QString>();
 
   const auto rowCount = table->rowCount();
 
-  SPDLOG_INFO("Adding new connection {} {}", connectionId, topics);
   for (int rowIndex = 0; rowIndex < rowCount; rowIndex++) {
-    const auto key = table->item(rowIndex, 0)->text().toStdString();
-    const auto value = table->item(rowIndex, 1)->text().toStdString();
-    SPDLOG_INFO("Connection propery: {}={}", key, value);
-    r.insert({key, value});
+    QString key = table->item(rowIndex, 0)->text();
+    QString value = table->item(rowIndex, 1)->text();
+    properties.insert(key, value);
   }
+
+  auto consumerProperties =
+      highway::facade::ConsumerProperties{.id = connectionId,
+                                          .topics = QList<QString>{topics},
+                                          .properties = properties};
+
+  auto [consumerId, connected] = _facade->addConsumer(consumerProperties);
+
+  auto i = new QListWidgetItem(this->_mainWindow.connectionListWidget);
+  i->setText(consumerId);
 }
 
-UI::UI(QObject *parent)
-    : QObject(parent), _mainWindowWidget(new QMainWindow()),
-      _mainWindow(new Ui::MainWindow()) {
+UI::UI(highway::facade::Facade *facade, QObject *parent)
+    : _facade(facade), QObject(parent), _mainWindowWidget(), _mainWindow() {
 
-  _mainWindow->setupUi(_mainWindowWidget);
-  _mainWindowWidget->show();
+  _mainWindow.setupUi(&_mainWindowWidget);
 
-  QObject::connect(_mainWindow->newConnectionButton, &QPushButton::clicked,
-                   this, &UI::showConnectionPropertiesForm);
+  QObject::connect(_mainWindow.newConnectionButton, &QPushButton::clicked, this,
+                   &UI::showConnectionPropertiesForm);
+
+  _mainWindowWidget.show();
 }
 
 void UI::showConnectionPropertiesForm() {
-  auto _connectionProperiesWidget = new QDialog(this->_mainWindowWidget);
-  _connectionProperiesWidget->setAttribute(Qt::WA_DeleteOnClose, true);
+  auto _connectionProperiesDialog = new QDialog(&this->_mainWindowWidget);
+  _connectionProperiesDialog->setAttribute(Qt::WA_DeleteOnClose, true);
 
-  auto _connectionPropertiesDialog = new Ui::ConnectionPropertiesDialog();
-  _connectionPropertiesDialog->setupUi(_connectionProperiesWidget);
+  auto connectionPropertiesDialog = Ui::ConnectionPropertiesDialog();
+  connectionPropertiesDialog.setupUi(_connectionProperiesDialog);
 
   auto topicsRegex = QRegularExpression("[a-zA-z0-9,_]+");
   auto topicsValidator =
-      new QRegularExpressionValidator(topicsRegex, _connectionProperiesWidget);
+      new QRegularExpressionValidator(topicsRegex, _connectionProperiesDialog);
 
-  _connectionPropertiesDialog->connectionId->setValidator(topicsValidator);
+  connectionPropertiesDialog.connectionId->setValidator(topicsValidator);
 
-  QObject::connect(_connectionPropertiesDialog->buttonBox,
-                   &QDialogButtonBox::accepted, this,
-                   [_connectionPropertiesDialog]() {
-                     saveConnectionProperties(_connectionPropertiesDialog);
-                   });
+  QObject::connect(
+      connectionPropertiesDialog.buttonBox, &QDialogButtonBox::accepted, this,
+      [=]() { this->saveConnectionProperties(connectionPropertiesDialog); });
 
-  _connectionProperiesWidget->show();
+  _connectionProperiesDialog->show();
 
   return;
 }
