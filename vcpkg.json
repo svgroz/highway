@@ -12,6 +12,9 @@
         {
             "name": "librdkafka",
             "default-features": false
+        },
+        {
+            "name": "boost-msm"
         }
     ]
 }
