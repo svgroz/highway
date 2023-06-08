@@ -1,7 +1,5 @@
 #pragma once
 
-#include <memory>
-
 #include <QHash>
 #include <QList>
 #include <QObject>
@@ -22,15 +20,15 @@ using ConsumerId = QString;
 class Consumer final : public QObject {
   Q_OBJECT
 public:
-  explicit Consumer(ConsumerProperties properties, QObject *parent = nullptr);
+  explicit Consumer(ConsumerProperties &properties, QObject *parent = nullptr);
   Consumer(Consumer &) = delete;
-  ~Consumer() override;
+  ~Consumer() final;
   void connect();
   const ConsumerId id();
 
 private:
   ConsumerProperties _consumerProperties;
-  std::unique_ptr<consumer_fsm> _fsm;
+  consumer_fsm *_fsm;
 };
 
 }; // namespace highway::kafka

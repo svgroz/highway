@@ -9,6 +9,7 @@
 #include "librdkafka/rdkafkacpp.h"
 
 #include <spdlog/spdlog.h>
+#include <utility>
 
 namespace highway::kafka {
 struct disconnect {};
@@ -30,7 +31,7 @@ struct Unsubscribed : public boost::msm::front::state<> {};
 
 using namespace boost::msm::front;
 
-struct consumer_fsm_
+struct consumer_fsm_ // TODO add destructor
     : public boost::msm::front::state_machine_def<consumer_fsm_> {
   using initial_state = Disconnected;
 
@@ -46,6 +47,7 @@ struct consumer_fsm_
       if (fsm._consumer) {
         fsm.process_event(connect_successed());
       } else {
+        SPDLOG_ERROR("Could not connect to broker: error={}", e);
         fsm.process_event(connect_unsuccessed());
       }
     }
@@ -54,8 +56,10 @@ struct consumer_fsm_
   struct disconnect_action {
     template <class EVT, class FSM, class SourceState, class TargetState>
     void operator()(EVT const &, FSM &fsm, SourceState &, TargetState &) {
-      fsm._consumer.close();
-      fsm._consumer = std::unique_ptr<RdKafka::KafkaConsumer>{};
+      if (fsm._consumer) {
+        fsm._consumer.close();
+        fsm._consumer = std::unique_ptr<RdKafka::KafkaConsumer>{};
+      }
     }
   };
 
@@ -89,9 +93,16 @@ struct consumer_fsm_
 
 struct consumer_fsm : boost::msm::back::state_machine<consumer_fsm_> {};
 
-Consumer::Consumer(ConsumerProperties consumerProperties, QObject *parent)
-    : QObject(parent), _consumerProperties(consumerProperties),
-      _fsm(std::make_unique<consumer_fsm>()){};
+Consumer::Consumer(ConsumerProperties &consumerProperties, QObject *parent)
+    : QObject(parent), _consumerProperties(std::move(consumerProperties)),
+      _fsm(new consumer_fsm()){};
+
+Consumer::~Consumer() {
+  if (this->_fsm) {
+    delete this->_fsm;
+    this->_fsm = nullptr;
+  }
+}
 
 void Consumer::connect(){};
 
