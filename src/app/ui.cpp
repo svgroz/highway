@@ -42,10 +42,10 @@ void UI::saveConnectionProperties(
                                           .topics = QList<QString>{topics},
                                           .properties = properties};
 
-  auto [consumerId, consumerStatus] = _facade->addConsumer(consumerProperties);
+  // auto [consumerId, consumerStatus] = _facade->addConsumer(consumerProperties);
 
-  auto i = new QListWidgetItem(this->_mainWindow.connectionListWidget);
-  i->setText(consumerId);
+  // auto i = new QListWidgetItem(this->_mainWindow.connectionListWidget);
+  // i->setText(consumerId);
 }
 
 UI::UI(highway::facade::Facade *facade, QObject *parent)

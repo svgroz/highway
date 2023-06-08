@@ -7,10 +7,9 @@ using namespace highway::facade;
 
 Facade::Facade(QObject *parent) : QObject(parent), _state(new State(this)) {}
 
-ConnectionStatus Facade::addConsumer(ConsumerProperties consumerProperties) {
+void Facade::addConsumer(ConsumerProperties consumerProperties) {
   auto consumer = new highway::kafka::Consumer(consumerProperties, this);
 
   auto id = _state->addConsumer(consumer);
-  auto consumerStatus = consumer->connect();
-  return {.consumerId = id, .consumerStatus = consumerStatus};
+  consumer->connect();
 }

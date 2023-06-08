@@ -10,11 +10,6 @@ namespace highway::facade {
 using State = highway::state::State;
 using ConsumerProperties = highway::kafka::ConsumerProperties;
 
-using ConnectionStatus = struct {
-  highway::kafka::ConsumerId consumerId;
-  highway::kafka::ConsumerStatus consumerStatus;
-};
-
 class Facade final : public QObject {
   Q_OBJECT
 public:
@@ -22,7 +17,7 @@ public:
   Facade(Facade &&) = delete;
   ~Facade() final = default;
 
-  ConnectionStatus addConsumer(ConsumerProperties consumerProperties);
+  void addConsumer(ConsumerProperties consumerProperties);
 
 private:
   State *_state;

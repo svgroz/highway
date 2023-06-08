@@ -12,6 +12,7 @@
 
 #include <facade.hpp>
 
+
 using namespace highway;
 
 int main(int argc, char **argv) {

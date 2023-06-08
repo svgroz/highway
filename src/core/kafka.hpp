@@ -1,17 +1,11 @@
 #pragma once
 
-#include <qobject.h>
-#include <qtmetamacros.h>
-#include <string>
-#include <unordered_map>
-#include <vector>
+#include <memory>
 
 #include <QHash>
 #include <QList>
 #include <QObject>
 #include <QString>
-
-#include <librdkafka/rdkafkacpp.h>
 
 namespace highway::kafka {
 
@@ -21,7 +15,7 @@ using ConsumerProperties = struct {
   QHash<QString, QString> properties;
 };
 
-using ConsumerStatus = enum { CONNECTED, DISCONNECTED, NOT_INITIALIZED };
+struct consumer_fsm;
 
 using ConsumerId = QString;
 
@@ -31,16 +25,12 @@ public:
   explicit Consumer(ConsumerProperties properties, QObject *parent = nullptr);
   Consumer(Consumer &) = delete;
   ~Consumer() override;
-  void consumerProperties(ConsumerProperties consumerProperties);
-  ConsumerStatus connect();
-  ConsumerStatus disocnnect();
-  ConsumerStatus status() noexcept;
+  void connect();
   const ConsumerId id();
 
 private:
   ConsumerProperties _consumerProperties;
-  RdKafka::Conf *_conf;
-  RdKafka::KafkaConsumer *_consumer;
+  std::unique_ptr<consumer_fsm> _fsm;
 };
 
 }; // namespace highway::kafka
