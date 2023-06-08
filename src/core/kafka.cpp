@@ -6,9 +6,10 @@
 #include <boost/msm/front/functor_row.hpp>
 #include <boost/msm/front/state_machine_def.hpp>
 
-#include "librdkafka/rdkafkacpp.h"
+#include <librdkafka/rdkafkacpp.h>
 
 #include <spdlog/spdlog.h>
+
 #include <utility>
 
 namespace highway::kafka {
@@ -93,8 +94,8 @@ struct consumer_fsm_ // TODO add destructor
 
 struct consumer_fsm : boost::msm::back::state_machine<consumer_fsm_> {};
 
-Consumer::Consumer(ConsumerProperties &consumerProperties, QObject *parent)
-    : QObject(parent), _consumerProperties(std::move(consumerProperties)),
+Consumer::Consumer(ConsumerProperties &consumerProperties)
+    : _consumerProperties(std::move(consumerProperties)),
       _fsm(new consumer_fsm()){};
 
 Consumer::~Consumer() {

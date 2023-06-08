@@ -17,38 +17,11 @@
 #include <memory>
 
 #include <spdlog/spdlog.h>
+#include <vector>
 
 using namespace highway::ui;
 
-void UI::saveConnectionProperties(
-    Ui::ConnectionPropertiesDialog _connectionProperties) {
-  auto connectionId = _connectionProperties.connectionId->text();
-  auto topics = _connectionProperties.topicsToListen->text();
-
-  auto table = _connectionProperties.propertiesTableWidget;
-
-  QHash<QString, QString> properties = QHash<QString, QString>();
-
-  const auto rowCount = table->rowCount();
-
-  for (int rowIndex = 0; rowIndex < rowCount; rowIndex++) {
-    QString key = table->item(rowIndex, 0)->text();
-    QString value = table->item(rowIndex, 1)->text();
-    properties.insert(key, value);
-  }
-
-  auto consumerProperties =
-      highway::facade::ConsumerProperties{.id = connectionId,
-                                          .topics = QList<QString>{topics},
-                                          .properties = properties};
-
-  // auto [consumerId, consumerStatus] = _facade->addConsumer(consumerProperties);
-
-  // auto i = new QListWidgetItem(this->_mainWindow.connectionListWidget);
-  // i->setText(consumerId);
-}
-
-UI::UI(highway::facade::Facade *facade, QObject *parent)
+UI::UI(std::shared_ptr<highway::facade::Facade> facade, QObject *parent)
     : _facade(facade), QObject(parent), _mainWindowWidget(), _mainWindow() {
 
   _mainWindow.setupUi(&_mainWindowWidget);
@@ -57,6 +30,35 @@ UI::UI(highway::facade::Facade *facade, QObject *parent)
                    &UI::showConnectionPropertiesForm);
 
   _mainWindowWidget.show();
+}
+
+void UI::saveConnectionProperties(
+    Ui::ConnectionPropertiesDialog _connectionProperties) {
+  auto connectionId = _connectionProperties.connectionId->text().toStdString();
+  auto topics = _connectionProperties.topicsToListen->text().toStdString();
+
+  auto table = _connectionProperties.propertiesTableWidget;
+
+  std::unordered_map<std::string, std::string> properties;
+
+  const auto rowCount = table->rowCount();
+
+  for (int rowIndex = 0; rowIndex < rowCount; rowIndex++) {
+    QString key = table->item(rowIndex, 0)->text();
+    QString value = table->item(rowIndex, 1)->text();
+    properties.insert({key.toStdString(), value.toStdString()});
+  }
+
+  auto consumerProperties = highway::facade::ConsumerProperties{
+      .id = connectionId,
+      .topics = std::vector<std::string>{topics},
+      .properties = properties};
+
+  // auto [consumerId, consumerStatus] =
+  _facade->addConsumer(consumerProperties);
+
+  // auto i = new QListWidgetItem(this->_mainWindow.connectionListWidget);
+  // i->setText(consumerId);
 }
 
 void UI::showConnectionPropertiesForm() {

@@ -1,9 +1,8 @@
 #pragma once
 
-#include <QList>
-#include <QObject>
 #include <algorithm>
-#include <qhash.h>
+#include <unordered_map>
+
 #include <spdlog/spdlog.h>
 
 #include "kafka.hpp"
@@ -12,15 +11,20 @@ namespace highway::state {
 
 using Consumer = highway::kafka::Consumer;
 
-class State final : public QObject {
-  Q_OBJECT
+class State final {
 public:
-  explicit State(QObject *parent = nullptr);
+  explicit State() = default;
   State(State &) = delete;
-  State(State &&) = delete;
-  const highway::kafka::ConsumerId addConsumer(Consumer *c);
+  State &operator=(const State &) = delete;
+
+  State(State &&) = default;
+  State &operator=(const State &&) = delete;
+
+  virtual ~State() final = default;
+
+  const highway::kafka::ConsumerId addConsumer(Consumer &c);
 
 private:
-  QHash<const QString, Consumer *> _consumers;
+  std::unordered_map<highway::kafka::ConsumerId, Consumer> _consumers;
 };
 } // namespace highway::state

@@ -21,7 +21,7 @@ int main(int argc, char **argv) {
 
   QApplication app(argc, argv);
 
-  auto facade = new highway::facade::Facade(&app);
+  auto facade = std::make_shared<highway::facade::Facade>();
   auto ui = new ui::UI(facade, &app);
   
   return app.exec();

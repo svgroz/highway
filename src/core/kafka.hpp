@@ -1,28 +1,30 @@
 #pragma once
 
-#include <QHash>
-#include <QList>
-#include <QObject>
-#include <QString>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
 namespace highway::kafka {
 
 using ConsumerProperties = struct {
-  QString id;
-  QList<QString> topics;
-  QHash<QString, QString> properties;
+  std::string id;
+  std::vector<std::string> topics;
+  std::unordered_map<std::string, std::string> properties;
 };
 
 struct consumer_fsm;
 
-using ConsumerId = QString;
+using ConsumerId = std::string;
 
-class Consumer final : public QObject {
-  Q_OBJECT
+class Consumer {
 public:
-  explicit Consumer(ConsumerProperties &properties, QObject *parent = nullptr);
+  explicit Consumer(ConsumerProperties &properties);
   Consumer(Consumer &) = delete;
-  ~Consumer() final;
+  Consumer &operator=(const Consumer &) = delete;
+
+  Consumer(Consumer &&) = default;
+
+  virtual ~Consumer();
   void connect();
   const ConsumerId id();
 
