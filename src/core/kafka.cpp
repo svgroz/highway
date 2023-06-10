@@ -8,6 +8,7 @@
 
 #include <librdkafka/rdkafkacpp.h>
 
+#include <memory>
 #include <spdlog/spdlog.h>
 
 #include <utility>
@@ -15,8 +16,8 @@
 namespace highway::kafka {
 struct disconnect {};
 struct connect {
-  connect(RdKafka::Conf *conf) : _conf(conf){};
-  RdKafka::Conf *_conf;
+  connect(std::shared_ptr<RdKafka::Conf> conf) : _conf(conf){};
+  std::shared_ptr<RdKafka::Conf> _conf;
 };
 struct connect_successed {};
 struct connect_unsuccessed {};
@@ -40,12 +41,13 @@ struct consumer_fsm_ // TODO add destructor
       std::unique_ptr<RdKafka::KafkaConsumer>{};
 
   struct connect_action {
-    template <class EVT, class FSM, class SourceState, class TargetState>
-    void operator()(EVT const &event, FSM &fsm, SourceState &, TargetState &) {
+    template <class FSM, class SourceState, class TargetState>
+    void operator()(connect const &event, FSM &fsm, SourceState &, TargetState &) {
       std::string e;
-      fsm._consumer = std::unique_ptr<RdKafka::KafkaConsumer>{
-          RdKafka::Consumer::create(event._conf, e)};
-      if (fsm._consumer) {
+      RdKafka::KafkaConsumer *consumer =
+          RdKafka::KafkaConsumer::create(event._conf.get(), e);
+      if (consumer != nullptr) {
+        fsm._consumer.reset(consumer);
         fsm.process_event(connect_successed());
       } else {
         SPDLOG_ERROR("Could not connect to broker: error={}", e);
@@ -66,28 +68,20 @@ struct consumer_fsm_ // TODO add destructor
 
   struct subscribe_action {
     template <class EVT, class FSM, class SourceState, class TargetState>
-    void operator()(EVT const &, FSM &fsm, SourceState &, TargetState &) {}
+    void operator()(EVT const &, FSM &, SourceState &, TargetState &) {}
   };
 
   struct unsubscribe_action {
     template <class EVT, class FSM, class SourceState, class TargetState>
-    void operator()(EVT const &, FSM &fsm, SourceState &, TargetState &) {}
+    void operator()(EVT const &, FSM &, SourceState &, TargetState &) {}
   };
 
   struct transition_table
       : boost::mpl::vector<
             // clang-format off
-    Row< Disconnected, connect,               none,         connect_action,     none>,
-    Row< Disconnected, connect_successed,     Connected,    none,               none>,
-    Row< Disconnected, connect_unsuccessed,   Disconnected, none,               none>,
-            
-
-    Row< Connected,    subscribe,             none,         none,               none>,
-    Row< Connected,    subscribe_successed,   Subscribed,   none,               none>,
-    Row< Connected,    subscribe_unsuccessed, Unsubscribed, none,               none>,
-    Row< Connected,    disconnect,            Disconnected, disconnect_action,  none>,
-
-    Row< Subscribed,   unsubscribe,           Unsubscribed, unsubscribe_action, none>
+    Row< Disconnected, connect,               none,             connect_action,     none>,
+    Row< Disconnected, connect_successed,     Connected,        none,               none>,
+    Row< Disconnected, connect_unsuccessed,   Disconnected,     none,               none>
             // clang-format on
             > {};
 };
@@ -105,7 +99,22 @@ Consumer::~Consumer() {
   }
 }
 
-void Consumer::connect(){};
+void Consumer::connect() {
+  auto c = std::shared_ptr<RdKafka::Conf>{
+      RdKafka::Conf::create(RdKafka::Conf::CONF_GLOBAL)};
+
+  std::string e;
+  for (auto p : _consumerProperties.properties) {
+    if (RdKafka::Conf::ConfResult::CONF_OK != c->set(p.first, p.second, e)) {
+      SPDLOG_ERROR(
+          "Could not set consumer confifuration property: key={}, value={}",
+          p.first, p.second);
+      break;
+    }
+  }
+
+  _fsm->process_event(highway::kafka::connect(c));
+};
 
 const ConsumerId Consumer::id() { return _consumerProperties.id; };
 

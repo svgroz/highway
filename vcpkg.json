@@ -15,6 +15,9 @@
         },
         {
             "name": "boost-msm"
+        },
+        {
+            "name": "boost-test"
         }
     ]
 }

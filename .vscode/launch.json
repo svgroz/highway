@@ -11,7 +11,14 @@
             "program": "${workspaceFolder}/out/build/clang-debug/src/app/highway.app/Contents/MacOS/highway",
             "args": [],
             "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "test_core",
+            "program": "${workspaceFolder}/out/build/clang-debug/src/test_core/test_core",
+            "args": [],
+            "cwd": "${workspaceFolder}"
         }
-
     ]
 }
