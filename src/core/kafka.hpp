@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -12,19 +13,20 @@ using ConsumerProperties = struct {
   std::unordered_map<std::string, std::string> properties;
 };
 
-struct consumer_fsm;
+class consumer_fsm;
 
 using ConsumerId = std::string;
 
-class Consumer {
+class Consumer final {
 public:
   explicit Consumer(ConsumerProperties &properties);
   Consumer(Consumer &) = delete;
   Consumer &operator=(const Consumer &) = delete;
 
   Consumer(Consumer &&) = default;
+  Consumer &operator=(Consumer &&) = default;
 
-  virtual ~Consumer();
+  virtual ~Consumer() final;
   void connect();
   const ConsumerId id();
 

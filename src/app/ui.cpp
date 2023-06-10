@@ -22,7 +22,7 @@
 using namespace highway::ui;
 
 UI::UI(std::shared_ptr<highway::facade::Facade> facade, QObject *parent)
-    : _facade(facade), QObject(parent), _mainWindowWidget(), _mainWindow() {
+    : QObject(parent), _facade(facade), _mainWindowWidget(), _mainWindow() {
 
   _mainWindow.setupUi(&_mainWindowWidget);
 

@@ -92,7 +92,7 @@ struct consumer_fsm_ // TODO add destructor
             > {};
 };
 
-struct consumer_fsm : boost::msm::back::state_machine<consumer_fsm_> {};
+class consumer_fsm : public boost::msm::back::state_machine<consumer_fsm_> {};
 
 Consumer::Consumer(ConsumerProperties &consumerProperties)
     : _consumerProperties(std::move(consumerProperties)),

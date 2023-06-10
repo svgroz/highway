@@ -18,7 +18,7 @@ public:
   State &operator=(const State &) = delete;
 
   State(State &&) = default;
-  State &operator=(const State &&) = delete;
+  State &operator=(State &&) = default;
 
   virtual ~State() final = default;
 
