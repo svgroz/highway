@@ -1,4 +1,4 @@
-#include "kafka.hpp"
+#pragma once
 
 #include <boost/msm/back/common_types.hpp>
 #include <boost/msm/back/state_machine.hpp>
@@ -7,15 +7,9 @@
 #include <boost/msm/front/functor_row.hpp>
 #include <boost/msm/front/state_machine_def.hpp>
 
-#include <librdkafka/rdkafkacpp.h>
-
-#include <memory>
-#include <mutex>
 #include <spdlog/spdlog.h>
 
-#include <utility>
-
-namespace highway::kafka {
+namespace higway::fsm::consumer {
 struct e_disconnect {};
 struct e_connect {};
 struct e_subscribe {};
@@ -32,9 +26,7 @@ struct Unsubscribed : public boost::msm::front::state<> {};
 
 using namespace boost::msm::front;
 
-const auto HADLED = boost::msm::back::HandledEnum::HANDLED_TRUE;
-
-struct consumer_fsm_ // TODO add destructor
+struct consumer_fsm_
     : public boost::msm::front::state_machine_def<consumer_fsm_> {
   using initial_state = Disconnected;
 
@@ -61,49 +53,4 @@ struct consumer_fsm_ // TODO add destructor
 };
 
 class consumer_fsm : public boost::msm::back::state_machine<consumer_fsm_> {};
-
-Consumer::Consumer(ConsumerProperties consumerProperties)
-    : _mutex(), _consumerProperties(consumerProperties),
-      _fsm(new consumer_fsm()), _kafkaConsumer(nullptr){};
-
-Consumer::~Consumer() {
-  if (this->_fsm) {
-    delete this->_fsm;
-    this->_fsm = nullptr;
-  }
-}
-
-ConsumerCodes Consumer::connect() {
-  std::unique_lock<std::mutex> lock(_mutex);
-  if (HADLED != _fsm->process_event(e_connect())) {
-    return ConsumerCodes::TARGET_STATE_UNREACHEBLE;
-  }
-
-  std::shared_ptr<RdKafka::Conf> conf = std::shared_ptr<RdKafka::Conf>{
-      RdKafka::Conf::create(RdKafka::Conf::CONF_GLOBAL)};
-
-  std::string e;
-  for (auto p : _consumerProperties.properties) {
-    if (RdKafka::Conf::ConfResult::CONF_OK != conf->set(p.first, p.second, e)) {
-      SPDLOG_ERROR(
-          "Could not set consumer confifuration property: key={} value={}",
-          p.first, p.second);
-    }
-  }
-
-  auto consumer = std::unique_ptr<RdKafka::KafkaConsumer>{
-      RdKafka::KafkaConsumer::create(conf.get(), e)};
-
-  if (consumer) {
-    this->_kafkaConsumer.swap(consumer);
-    _fsm->process_event(e_connect());
-    return ConsumerCodes::OK;
-  } else {
-    _fsm->process_event(e_disconnect());
-    return ConsumerCodes::COULD_NOT_CONNECT;
-  }
-};
-
-const ConsumerId Consumer::id() noexcept { return _consumerProperties.id; };
-
-}; // namespace highway::kafka
+} // namespace higway::fsm::consumer

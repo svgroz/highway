@@ -4,7 +4,7 @@
     "clangd.arguments": [
         "--background-index",
         "--clang-tidy",
-        "--compile-commands-dir=out/build/clang-debug"
+        "--compile-commands-dir=out/build/gcc-debug"
     ],
     "clang-format.fallbackStyle": "LLVM"
 }
